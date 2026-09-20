@@ -418,7 +418,7 @@
 
       function richHtml(text) {
         const { parts } = classify(text);
-        return parts.map((part) => {
+        const lines = parts.map((part) => {
           const safe = escapeHtml(part.text);
           const link = linkForLine(part.text);
           let content = link ? publishedLinkHtml(link) : safe;
@@ -430,6 +430,8 @@
           }
           return content;
         }).join('<br>');
+        // 公众号发布页的默认行高，避免手机端把连续正文误判为文字重叠。
+        return `<span style="line-height:1.6">${lines}</span>`;
       }
 
       function showStatus(message, kind = '') {
