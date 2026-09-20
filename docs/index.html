@@ -145,11 +145,6 @@
       overflow-wrap: break-word;
     }
 
-    .preview p {
-      min-height: 1.6em;
-      margin: 0;
-    }
-
     textarea::placeholder { color: #9aa4ad; }
 
     .preview:empty::before {
@@ -366,8 +361,7 @@
         const { parts, matches } = classify(text);
         const fragment = document.createDocumentFragment();
 
-        parts.forEach((part) => {
-          const paragraph = document.createElement('p');
+        parts.forEach((part, index) => {
           let node;
           if (part.type === 'category') {
             node = document.createElement('strong');
@@ -383,13 +377,9 @@
               node.rel = 'noopener noreferrer';
             }
           }
-          if (part.text) {
-            node.textContent = part.text;
-            paragraph.appendChild(node);
-          } else {
-            paragraph.appendChild(document.createElement('br'));
-          }
-          fragment.appendChild(paragraph);
+          node.textContent = part.text;
+          fragment.appendChild(node);
+          if (index < parts.length - 1) fragment.appendChild(document.createElement('br'));
         });
 
         preview.replaceChildren(fragment);
@@ -422,16 +412,15 @@
         return parts.map((part) => {
           const safe = escapeHtml(part.text);
           const link = linkForLine(part.text);
-          let content = link ? publishedLinkHtml(link) : (safe || '<br>');
+          let content = link ? publishedLinkHtml(link) : safe;
           if (part.type === 'category') {
             content = `<span style="color:rgb(2,30,170);font-weight:bold">${safe}</span>`;
           }
           if (part.type === 'title') {
             content = `<span style="font-weight:bold">${safe}</span>`;
           }
-          // 正文不写入字体、字号、颜色、行距或段距，由公众号后台默认样式接管。
-          return `<p><span>${content}</span></p>`;
-        }).join('');
+          return content;
+        }).join('<br>');
       }
 
       function showStatus(message, kind = '') {
