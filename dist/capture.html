@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f7fb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>微信公众号富文本取样器</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172033;
+      --muted: #687386;
+      --line: #dce2eb;
+      --panel: #ffffff;
+      --canvas: #f5f7fb;
+      --blue: #1836c9;
+      --blue-dark: #102aa8;
+      --green: #147a50;
+      --amber: #94620b;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--canvas);
+      color: var(--ink);
+      font-size: 16px;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    .shell {
+      width: min(720px, 100%);
+      margin: 0 auto;
+      padding: max(28px, env(safe-area-inset-top)) 18px max(36px, env(safe-area-inset-bottom));
+    }
+
+    header { margin: 0 2px 24px; }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .12em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(27px, 7vw, 38px);
+      line-height: 1.2;
+      letter-spacing: -.02em;
+    }
+
+    .intro {
+      margin: 12px 0 0;
+      max-width: 40em;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .card {
+      overflow: hidden;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: 0 14px 36px rgba(31, 44, 74, .07);
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 18px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .card-head strong { font-size: 17px; }
+
+    .status {
+      flex: none;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: #eef1f6;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .status.good { background: #e8f6ef; color: var(--green); }
+    .status.plain { background: #fff5df; color: var(--amber); }
+
+    .paste-zone {
+      min-height: 250px;
+      padding: 20px 18px;
+      outline: none;
+      color: #252b38;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      -webkit-user-select: text;
+      user-select: text;
+    }
+
+    .paste-zone:empty::before {
+      content: "点这里，长按后选择“粘贴”\A\A请粘贴一小段已经手工排版正确的内容。";
+      color: #9199a8;
+      white-space: pre-wrap;
+      pointer-events: none;
+    }
+
+    .paste-zone:focus { box-shadow: inset 0 0 0 2px rgba(24, 54, 201, .18); }
+
+    .result {
+      display: none;
+      padding: 14px 18px;
+      border-top: 1px solid var(--line);
+      background: #fafbfe;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .result.show { display: block; }
+    .result strong { color: var(--ink); }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button {
+      min-height: 52px;
+      border: 0;
+      border-radius: 14px;
+      padding: 13px 15px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:disabled { cursor: not-allowed; opacity: .42; }
+
+    .primary {
+      grid-column: 1 / -1;
+      background: var(--blue);
+      color: #fff;
+      box-shadow: 0 7px 18px rgba(24, 54, 201, .2);
+    }
+
+    .primary:active { background: var(--blue-dark); }
+    .secondary { background: #e9edf5; color: var(--ink); }
+    .ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+
+    .privacy {
+      margin: 18px 3px 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: max(24px, env(safe-area-inset-bottom));
+      z-index: 10;
+      max-width: calc(100vw - 36px);
+      transform: translate(-50%, 24px);
+      padding: 11px 16px;
+      border-radius: 999px;
+      background: #172033;
+      color: #fff;
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: .2s ease;
+    }
+
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    @media (min-width: 620px) {
+      .shell { padding-top: 54px; }
+      .card-head, .paste-zone, .result { padding-left: 24px; padding-right: 24px; }
+      .paste-zone { min-height: 300px; }
+      .actions { grid-template-columns: 2fr 1fr 1fr; }
+      .primary { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <p class="eyebrow">LOCAL CLIPBOARD CAPTURE</p>
+      <h1>公众号富文本取样器</h1>
+      <p class="intro">复制一段已经排版正确的内容，再粘贴到下方。这里会保留剪贴板提供的原始 HTML，便于精确复刻格式。</p>
+    </header>
+
+    <section class="card" aria-labelledby="paste-title">
+      <div class="card-head">
+        <strong id="paste-title">粘贴正确样本</strong>
+        <span class="status" id="status">等待粘贴</span>
+      </div>
+      <div class="paste-zone" id="pasteZone" contenteditable="true" role="textbox" aria-multiline="true" aria-label="粘贴富文本样本" spellcheck="false"></div>
+      <div class="result" id="result" aria-live="polite"></div>
+    </section>
+
+    <div class="actions">
+      <button class="primary" id="downloadButton" type="button" disabled>下载样本文件</button>
+      <button class="secondary" id="copyButton" type="button" disabled>复制诊断数据</button>
+      <button class="ghost" id="clearButton" type="button">清空</button>
+    </div>
+
+    <p class="privacy">全部处理只在当前浏览器内完成，不会上传内容。导出的 JSON 文件可直接发到对话中供分析。</p>
+  </main>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+    (() => {
+      const zone = document.getElementById('pasteZone');
+      const status = document.getElementById('status');
+      const result = document.getElementById('result');
+      const downloadButton = document.getElementById('downloadButton');
+      const copyButton = document.getElementById('copyButton');
+      const clearButton = document.getElementById('clearButton');
+      const toast = document.getElementById('toast');
+      let sample = null;
+      let toastTimer = 0;
+
+      const showToast = (message) => {
+        window.clearTimeout(toastTimer);
+        toast.textContent = message;
+        toast.classList.add('show');
+        toastTimer = window.setTimeout(() => toast.classList.remove('show'), 2200);
+      };
+
+      const buildSample = (clipboard) => {
+        const types = clipboard ? Array.from(clipboard.types || []) : [];
+        const html = clipboard && types.includes('text/html') ? clipboard.getData('text/html') : '';
+        const plainText = clipboard ? clipboard.getData('text/plain') : '';
+        return {
+          schema: 'wechat-richtext-sample',
+          version: 1,
+          captured_at: new Date().toISOString(),
+          user_agent: navigator.userAgent,
+          clipboard_types: types,
+          html,
+          plain_text: plainText
+        };
+      };
+
+      const jsonText = () => JSON.stringify(sample, null, 2);
+
+      const renderSample = () => {
+        const hasHtml = Boolean(sample && sample.html);
+        const textLength = sample ? sample.plain_text.length : 0;
+        status.textContent = hasHtml ? '已捕获富文本' : '仅捕获纯文本';
+        status.className = `status ${hasHtml ? 'good' : 'plain'}`;
+        result.innerHTML = hasHtml
+          ? `<strong>取样成功。</strong>HTML ${sample.html.length.toLocaleString()} 字符，纯文本 ${textLength.toLocaleString()} 字符。`
+          : `<strong>来源没有提供 HTML。</strong>已捕获纯文本 ${textLength.toLocaleString()} 字符；请仍然下载样本，这也是重要的诊断结果。`;
+        result.classList.add('show');
+        downloadButton.disabled = false;
+        copyButton.disabled = false;
+      };
+
+      zone.addEventListener('paste', (event) => {
+        event.preventDefault();
+        sample = buildSample(event.clipboardData);
+        zone.textContent = sample.plain_text || '（剪贴板未提供可显示的纯文本）';
+        renderSample();
+      });
+
+      downloadButton.addEventListener('click', () => {
+        if (!sample) return;
+        const blob = new Blob([jsonText()], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = 'wechat-richtext-sample.json';
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showToast('样本文件已生成');
+      });
+
+      copyButton.addEventListener('click', async () => {
+        if (!sample) return;
+        try {
+          await navigator.clipboard.writeText(jsonText());
+          showToast('诊断数据已复制');
+        } catch (error) {
+          const selection = window.getSelection();
+          const range = document.createRange();
+          zone.textContent = jsonText();
+          range.selectNodeContents(zone);
+          selection.removeAllRanges();
+          selection.addRange(range);
+          showToast('请点“复制”完成复制');
+        }
+      });
+
+      clearButton.addEventListener('click', () => {
+        sample = null;
+        zone.textContent = '';
+        status.textContent = '等待粘贴';
+        status.className = 'status';
+        result.textContent = '';
+        result.classList.remove('show');
+        downloadButton.disabled = true;
+        copyButton.disabled = true;
+        zone.focus();
+      });
+    })();
+  </script>
+</body>
+</html>

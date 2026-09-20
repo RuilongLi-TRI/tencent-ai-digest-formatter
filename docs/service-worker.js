@@ -1,5 +1,5 @@
-const CACHE = 'ai-digest-formatter-v4';
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './favicon.svg', './apple-touch-icon.png', './icon-192.png', './icon-512.png'];
+const CACHE = 'ai-digest-formatter-v5';
+const ASSETS = ['./', './index.html', './capture.html', './manifest.webmanifest', './favicon.svg', './apple-touch-icon.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(ASSETS)));
