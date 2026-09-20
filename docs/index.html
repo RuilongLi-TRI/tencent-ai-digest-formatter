@@ -269,7 +269,7 @@
         <p class="eyebrow">Tencent Research / AI Digest</p>
         <h1>极简排版器</h1>
       </div>
-      <p class="note">直接粘贴混合格式内容：先自动清除原格式，再按公众号发布页面生成默认正文与两类标题。</p>
+      <p class="note">直接粘贴混合格式内容：自动清除原格式和所有空白行，再复原公众号发布状态。</p>
     </header>
 
     <section class="workspace" aria-label="排版工作区">
@@ -278,7 +278,7 @@
           <h2 class="panel-title">01 / 粘贴并清除格式</h2>
           <span class="counter" id="counter">0 字</span>
         </div>
-        <textarea id="input" aria-label="粘贴混合格式原文，自动清除格式" spellcheck="false" placeholder="直接粘贴带有字体、字号、颜色等混合格式的全文……"></textarea>
+        <textarea id="input" aria-label="粘贴混合格式原文，自动清除格式和空白行" spellcheck="false" placeholder="直接粘贴全文；原格式和所有空白行会自动清除……"></textarea>
       </div>
 
       <div class="panel">
@@ -319,6 +319,14 @@
 
       const numberedTitlePattern = /^\s*[一二三四五六七八九十百]+、\s*\S/;
 
+      function removeBlankLines(text) {
+        return text
+          .replace(/\r\n?/g, '\n')
+          .split('\n')
+          .filter((line) => line.trim() !== '')
+          .join('\n');
+      }
+
       function isCategory(lines, index) {
         const text = lines[index].trim();
         if (!text) return false;
@@ -338,7 +346,8 @@
       }
 
       function classify(text) {
-        const lines = text.split('\n');
+        const cleanText = removeBlankLines(text);
+        const lines = cleanText ? cleanText.split('\n') : [];
         let matches = 0;
         const parts = lines.map((line, index) => {
           let type = 'plain';
@@ -351,7 +360,7 @@
       }
 
       function render() {
-        const text = input.value;
+        const text = removeBlankLines(input.value);
         if (!text) {
           preview.replaceChildren();
           counter.textContent = '0 字';
@@ -448,7 +457,7 @@
       }
 
       async function copyRich() {
-        const plainText = input.value;
+        const plainText = removeBlankLines(input.value);
         if (!plainText) return showStatus('请先粘贴内容', 'error');
         const html = richHtml(plainText);
         try {
@@ -473,7 +482,7 @@
       }
 
       async function copyPlain() {
-        const text = input.value;
+        const text = removeBlankLines(input.value);
         if (!text) return showStatus('请先粘贴内容', 'error');
         try {
           if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text);
@@ -496,12 +505,13 @@
           return;
         }
 
-        const cleanText = plainText.replace(/\r\n?/g, '\n');
+        const cleanText = removeBlankLines(plainText);
         const start = input.selectionStart;
         const end = input.selectionEnd;
         input.setRangeText(cleanText, start, end, 'end');
+        input.value = removeBlankLines(input.value);
         render();
-        showStatus('已清除原格式，并重新应用公众号默认格式', 'success');
+        showStatus('已清除原格式和空白行，并复原公众号格式', 'success');
       });
 
       input.addEventListener('input', render);
@@ -534,10 +544,10 @@
             if (!payload || typeof payload.text !== 'string' || !payload.text.trim()) {
               throw new Error('text 必须是非空字符串');
             }
-            input.value = payload.text.replace(/\r\n?/g, '\n');
+            input.value = removeBlankLines(payload.text);
             render();
             const result = classify(input.value);
-            showStatus('已清除原格式，并重新应用公众号默认格式', 'success');
+            showStatus('已清除原格式和空白行，并复原公众号格式', 'success');
             return { characters: input.value.length, formatted_lines: result.matches };
           }
         }, { signal: lifecycle.signal })).catch(() => {});
