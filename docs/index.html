@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#021eaa">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="AI速递排版">
+  <meta name="description" content="清除混合格式，并生成适合微信公众号的极简富文本。内容只在浏览器本地处理。">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <title>腾讯研究院 AI 速递 · 极简排版器</title>
+  <style>
+    :root {
+      --ink: #17212b;
+      --muted: #697582;
+      --line: #dce3e8;
+      --paper: #ffffff;
+      --wash: #f3f6f8;
+      --blue: #021eaa;
+      --blue-dark: #011579;
+      --danger: #a33a31;
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { -webkit-text-size-adjust: 100%; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        linear-gradient(rgba(23, 33, 43, .035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(23, 33, 43, .035) 1px, transparent 1px),
+        var(--wash);
+      background-size: 24px 24px;
+      font-family: "Songti SC", "Noto Serif CJK SC", serif;
+    }
+
+    button, textarea { font: inherit; }
+
+    .shell {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: max(30px, env(safe-area-inset-top)) 0 max(40px, env(safe-area-inset-bottom));
+    }
+
+    header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 22px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--blue);
+      font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+      font-size: 12px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(26px, 5vw, 46px);
+      font-weight: 700;
+      letter-spacing: -.04em;
+      line-height: 1.08;
+    }
+
+    .note {
+      max-width: 410px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 16px;
+    }
+
+    .panel {
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper);
+      box-shadow: 0 16px 50px rgba(29, 43, 56, .08);
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 52px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-title {
+      margin: 0;
+      font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+    }
+
+    .counter {
+      color: var(--muted);
+      font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+      font-size: 11px;
+    }
+
+    textarea, .preview {
+      display: block;
+      width: 100%;
+      min-height: 58vh;
+      padding: 20px;
+      border: 0;
+      outline: 0;
+      color: #222;
+      background: #fff;
+      resize: vertical;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .preview {
+      color: #222;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      letter-spacing: normal;
+      text-align: left;
+      overflow-wrap: break-word;
+    }
+
+    .preview p {
+      min-height: 1.6em;
+      margin: 0;
+    }
+
+    textarea::placeholder { color: #9aa4ad; }
+
+    .preview:empty::before {
+      content: "预览会在这里同步出现";
+      color: #9aa4ad;
+    }
+
+    .category { color: #021eaa; }
+
+    .preview a {
+      color: #576b95;
+      text-decoration: none;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button {
+      min-height: 44px;
+      padding: 0 17px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--ink);
+      background: var(--paper);
+      cursor: pointer;
+      transition: transform .15s ease, border-color .15s ease, background .15s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:hover { border-color: #aeb8c0; }
+    button:active { transform: translateY(1px); }
+    button:focus-visible { outline: 3px solid rgba(0, 82, 217, .22); outline-offset: 2px; }
+
+    .primary {
+      border-color: var(--blue);
+      color: #fff;
+      background: var(--blue);
+    }
+
+    .primary:hover { border-color: var(--blue-dark); background: var(--blue-dark); }
+    .clear { margin-left: auto; color: var(--danger); }
+
+    .status {
+      min-height: 22px;
+      margin: 12px 4px 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status[data-kind="success"] { color: #237804; }
+    .status[data-kind="error"] { color: var(--danger); }
+    .status:empty { display: none; }
+
+    .copy-source {
+      position: fixed;
+      left: -10000px;
+      top: 0;
+      width: 600px;
+      background: #fff;
+      white-space: pre-wrap;
+    }
+
+    @media (max-width: 760px) {
+      .shell {
+        width: min(100% - 20px, 640px);
+        padding-top: max(18px, env(safe-area-inset-top));
+        padding-bottom: calc(124px + env(safe-area-inset-bottom));
+      }
+      header { display: block; margin-bottom: 16px; }
+      .note { margin-top: 12px; }
+      .workspace { grid-template-columns: 1fr; }
+      textarea, .preview { min-height: 42vh; padding: 16px; }
+      .actions {
+        position: fixed;
+        z-index: 20;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        gap: 8px;
+        margin: 0;
+        padding: 10px max(10px, env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+        border-top: 1px solid rgba(220, 227, 232, .92);
+        background: rgba(255, 255, 255, .94);
+        box-shadow: 0 -12px 36px rgba(23, 33, 43, .12);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+      }
+      button { min-height: 50px; padding-inline: 13px; }
+      .primary { grid-column: auto; }
+      .clear { margin-left: 0; }
+      .status:not(:empty) {
+        position: fixed;
+        z-index: 21;
+        right: 14px;
+        bottom: calc(76px + env(safe-area-inset-bottom));
+        left: 14px;
+        margin: 0;
+        padding: 10px 12px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, .96);
+        box-shadow: 0 10px 30px rgba(23, 33, 43, .14);
+        text-align: center;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      button { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div>
+        <p class="eyebrow">Tencent Research / AI Digest</p>
+        <h1>极简排版器</h1>
+      </div>
+      <p class="note">直接粘贴混合格式内容：先自动清除原格式，再按公众号发布页面生成默认正文与两类标题。</p>
+    </header>
+
+    <section class="workspace" aria-label="排版工作区">
+      <div class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title">01 / 粘贴并清除格式</h2>
+          <span class="counter" id="counter">0 字</span>
+        </div>
+        <textarea id="input" aria-label="粘贴混合格式原文，自动清除格式" spellcheck="false" placeholder="直接粘贴带有字体、字号、颜色等混合格式的全文……"></textarea>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title">02 / 效果预览</h2>
+          <span class="counter" id="matchCount">0 处格式</span>
+        </div>
+        <div id="preview" class="preview" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button type="button" class="primary" id="copyRich">一键复制富文本</button>
+      <button type="button" id="copyPlain">一键复制纯文本</button>
+      <button type="button" class="clear" id="clear">清空</button>
+    </div>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+  </main>
+
+  <div id="copySource" class="copy-source" contenteditable="true" aria-hidden="true"></div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const input = document.getElementById('input');
+      const preview = document.getElementById('preview');
+      const counter = document.getElementById('counter');
+      const matchCount = document.getElementById('matchCount');
+      const status = document.getElementById('status');
+      const copySource = document.getElementById('copySource');
+
+      const fixedCategories = new Set([
+        '生成式AI', '前沿科技', '报告观点', '行业动态', '产业动态',
+        '大模型', '产品应用', '投融资', '政策监管', '学术研究',
+        '人工智能', '数字经济', '科技前沿', '市场观察', '企业动态'
+      ]);
+
+      const numberedTitlePattern = /^\s*[一二三四五六七八九十百]+、\s*\S/;
+
+      function isCategory(lines, index) {
+        const text = lines[index].trim();
+        if (!text) return false;
+        if (fixedCategories.has(text)) return true;
+
+        // 简短栏目名 + 后续出现中文序号标题；排除正文、链接及结尾文案。
+        if (text.length < 2 || text.length > 10) return false;
+        if (!/[\u3400-\u9fff]/.test(text)) return false;
+        if (/[，。；：！？、,.!?;:：/\\\[\]()（）<>👇]/.test(text)) return false;
+        if (/^(https?:|www\.|阅读原文|暂无评论|图片)/i.test(text)) return false;
+
+        for (let i = index + 1; i < lines.length; i += 1) {
+          if (!lines[i].trim()) continue;
+          return numberedTitlePattern.test(lines[i]);
+        }
+        return false;
+      }
+
+      function classify(text) {
+        const lines = text.split('\n');
+        let matches = 0;
+        const parts = lines.map((line, index) => {
+          let type = 'plain';
+          if (isCategory(lines, index)) type = 'category';
+          else if (numberedTitlePattern.test(line)) type = 'title';
+          if (type !== 'plain') matches += 1;
+          return { text: line, type };
+        });
+        return { parts, matches };
+      }
+
+      function render() {
+        const text = input.value;
+        if (!text) {
+          preview.replaceChildren();
+          counter.textContent = '0 字';
+          matchCount.textContent = '0 处格式';
+          return;
+        }
+        const { parts, matches } = classify(text);
+        const fragment = document.createDocumentFragment();
+
+        parts.forEach((part) => {
+          const paragraph = document.createElement('p');
+          let node;
+          if (part.type === 'category') {
+            node = document.createElement('strong');
+            node.className = 'category';
+          } else if (part.type === 'title') {
+            node = document.createElement('strong');
+          } else {
+            const link = linkForLine(part.text);
+            node = document.createElement(link ? 'a' : 'span');
+            if (link) {
+              node.href = link.url;
+              node.target = '_blank';
+              node.rel = 'noopener noreferrer';
+            }
+          }
+          if (part.text) {
+            node.textContent = part.text;
+            paragraph.appendChild(node);
+          } else {
+            paragraph.appendChild(document.createElement('br'));
+          }
+          fragment.appendChild(paragraph);
+        });
+
+        preview.replaceChildren(fragment);
+        counter.textContent = `${text.length} 字`;
+        matchCount.textContent = `${matches} 处格式`;
+      }
+
+      function escapeHtml(text) {
+        return text
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#39;');
+      }
+
+      function linkForLine(text) {
+        const match = text.match(/^(\s*)(https?:\/\/\S+)(\s*)$/i);
+        if (!match) return null;
+        return { before: match[1], url: match[2], after: match[3] };
+      }
+
+      function publishedLinkHtml(link) {
+        const url = escapeHtml(link.url);
+        return `${escapeHtml(link.before)}<a class="normal_text_link mp_article_text_link" target="_blank" href="${url}" textvalue="" linktype="text" data-linktype="2">${url}</a>${escapeHtml(link.after)}`;
+      }
+
+      function richHtml(text) {
+        const { parts } = classify(text);
+        return parts.map((part) => {
+          const safe = escapeHtml(part.text);
+          const link = linkForLine(part.text);
+          let content = link ? publishedLinkHtml(link) : (safe || '<br>');
+          if (part.type === 'category') {
+            content = `<span style="color:rgb(2,30,170);font-weight:bold">${safe}</span>`;
+          }
+          if (part.type === 'title') {
+            content = `<span style="font-weight:bold">${safe}</span>`;
+          }
+          // 正文不写入字体、字号、颜色、行距或段距，由公众号后台默认样式接管。
+          return `<p><span>${content}</span></p>`;
+        }).join('');
+      }
+
+      function showStatus(message, kind = '') {
+        status.textContent = message;
+        status.dataset.kind = kind;
+        window.clearTimeout(showStatus.timer);
+        showStatus.timer = window.setTimeout(() => {
+          status.textContent = '';
+          status.dataset.kind = '';
+        }, 2600);
+      }
+
+      function fallbackCopy(html, plainText) {
+        copySource.innerHTML = html;
+        const selection = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents(copySource);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        const copied = document.execCommand('copy');
+        selection.removeAllRanges();
+        copySource.replaceChildren();
+        if (!copied) throw new Error('copy failed');
+        return plainText;
+      }
+
+      async function copyRich() {
+        const plainText = input.value;
+        if (!plainText) return showStatus('请先粘贴内容', 'error');
+        const html = richHtml(plainText);
+        try {
+          if (navigator.clipboard && window.ClipboardItem) {
+            const item = new ClipboardItem({
+              'text/html': new Blob([html], { type: 'text/html' }),
+              'text/plain': new Blob([plainText], { type: 'text/plain' })
+            });
+            await navigator.clipboard.write([item]);
+          } else {
+            fallbackCopy(html, plainText);
+          }
+          showStatus('已复制富文本，可直接粘贴到公众号后台', 'success');
+        } catch (error) {
+          try {
+            fallbackCopy(html, plainText);
+            showStatus('已复制富文本，可直接粘贴到公众号后台', 'success');
+          } catch (fallbackError) {
+            showStatus('复制失败，请在预览区手动全选复制', 'error');
+          }
+        }
+      }
+
+      async function copyPlain() {
+        const text = input.value;
+        if (!text) return showStatus('请先粘贴内容', 'error');
+        try {
+          if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text);
+          else fallbackCopy(escapeHtml(text).replaceAll('\n', '<br>'), text);
+          showStatus('已复制纯文本', 'success');
+        } catch (error) {
+          showStatus('复制失败，请在粘贴区手动全选复制', 'error');
+        }
+      }
+
+      input.addEventListener('paste', (event) => {
+        const clipboard = event.clipboardData;
+        if (!clipboard) return;
+
+        // 只读取剪贴板的纯文本通道，所有来源 HTML/CSS 格式都在这里被丢弃。
+        const plainText = clipboard.getData('text/plain');
+        event.preventDefault();
+        if (!plainText && clipboard.getData('text/html')) {
+          showStatus('浏览器未提供纯文本内容，请先粘贴到纯文本应用后再试', 'error');
+          return;
+        }
+
+        const cleanText = plainText.replace(/\r\n?/g, '\n');
+        const start = input.selectionStart;
+        const end = input.selectionEnd;
+        input.setRangeText(cleanText, start, end, 'end');
+        render();
+        showStatus('已清除原格式，并重新应用公众号默认格式', 'success');
+      });
+
+      input.addEventListener('input', render);
+      document.getElementById('copyRich').addEventListener('click', copyRich);
+      document.getElementById('copyPlain').addEventListener('click', copyPlain);
+      document.getElementById('clear').addEventListener('click', () => {
+        input.value = '';
+        render();
+        input.focus();
+        showStatus('已清空');
+      });
+
+      const modelContext = document.modelContext;
+      if (modelContext?.registerTool) {
+        const lifecycle = new AbortController();
+        Promise.resolve(modelContext.registerTool({
+          name: 'format_ai_digest',
+          title: '整理 AI 速递正文',
+          description: '清除输入正文的原格式，并在页面中生成公众号默认正文、蓝色加粗分类标题和黑色加粗速递标题。',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              text: { type: 'string', description: '需要整理的完整 AI 速递正文。' }
+            },
+            required: ['text'],
+            additionalProperties: false
+          },
+          annotations: { readOnlyHint: false, untrustedContentHint: true },
+          execute(payload) {
+            if (!payload || typeof payload.text !== 'string' || !payload.text.trim()) {
+              throw new Error('text 必须是非空字符串');
+            }
+            input.value = payload.text.replace(/\r\n?/g, '\n');
+            render();
+            const result = classify(input.value);
+            showStatus('已清除原格式，并重新应用公众号默认格式', 'success');
+            return { characters: input.value.length, formatted_lines: result.matches };
+          }
+        }, { signal: lifecycle.signal })).catch(() => {});
+      }
+
+      render();
+
+      if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
