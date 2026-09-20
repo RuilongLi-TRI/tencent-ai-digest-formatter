@@ -413,25 +413,23 @@
 
       function publishedLinkHtml(link) {
         const url = escapeHtml(link.url);
-        return `${escapeHtml(link.before)}<a class="normal_text_link mp_article_text_link" target="_blank" href="${url}" textvalue="" linktype="text" data-linktype="2">${url}</a>${escapeHtml(link.after)}`;
+        return `${escapeHtml(link.before)}<a class="normal_text_link mp_article_text_link" target="_blank" style="" href="${url}" textvalue="" linktype="text" data-linktype="2">${url}</a>${escapeHtml(link.after)}`;
       }
 
       function richHtml(text) {
         const { parts } = classify(text);
-        const lines = parts.map((part) => {
+        return parts.map((part) => {
           const safe = escapeHtml(part.text);
           const link = linkForLine(part.text);
-          let content = link ? publishedLinkHtml(link) : safe;
           if (part.type === 'category') {
-            content = `<span style="color:rgb(2,30,170);font-weight:bold">${safe}</span>`;
+            return `<p><span leaf=""><span textstyle="" style="color: rgb(2, 30, 170); font-weight: bold">${safe}</span></span></p>`;
           }
           if (part.type === 'title') {
-            content = `<span style="font-weight:bold">${safe}</span>`;
+            return `<p><span leaf=""><span textstyle="" style="font-weight: bold">${safe}</span></span></p>`;
           }
-          return content;
-        }).join('<br>');
-        // 公众号发布页的默认行高，避免手机端把连续正文误判为文字重叠。
-        return `<span style="line-height:1.6">${lines}</span>`;
+          const content = link ? publishedLinkHtml(link) : safe;
+          return `<p><span leaf="">${content}</span></p>`;
+        }).join('');
       }
 
       function showStatus(message, kind = '') {
