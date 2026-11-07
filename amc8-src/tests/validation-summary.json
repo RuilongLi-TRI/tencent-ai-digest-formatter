@@ -1,0 +1,11 @@
+{
+  "math": "PASS 12 weeks, 5 questions, 60 slots, 49 distinct, 11 revisits, 3+20+7",
+  "core": "PASS schema 3, schema 2 migration, blank versus wrong, timing, event cap, import limits",
+  "app_harness": "PASS reload keeps events, quota export, malicious import, manual repository read",
+  "bundle": "PASS subdirectory-safe single file, one parent-triggered GitHub read, no token",
+  "browser": "Local 1280x800 check with an empty profile and a clearly fake fixture. Fixture storage was cleared after the check and was not committed.",
+  "version": "weekly30-v3",
+  "feature": "process-history-v3",
+  "personal_progress_included": false,
+  "automatic_github_sync": false
+}

@@ -1,0 +1,134 @@
+[
+  {
+    "title": "MAA · AMC 官方介绍",
+    "url": "https://maa.org/student-programs/amc/",
+    "cost": "免费",
+    "language": "英文",
+    "stage": "家长可选参考，不是额外练习安排",
+    "practice": "规则，不直接练题",
+    "status": "正文已读取",
+    "use": "只供家长查阅。若选用其中内容，替换本周原有概念时段或一道同主题题目，总预算仍为30分钟；无需另外完成教材、题组或整卷。",
+    "core": "规则"
+  },
+  {
+    "title": "MAA · 官方竞赛政策",
+    "url": "https://maa.org/student-programs/amc/maa-american-mathematics-competitions-policies/",
+    "cost": "免费",
+    "language": "英文",
+    "stage": "家长可选参考，不是额外练习安排",
+    "practice": "规则文件入口",
+    "status": "正文已读取；链接的政策PDF未逐份读取",
+    "use": "只供家长查阅。若选用其中内容，替换本周原有概念时段或一道同主题题目，总预算仍为30分钟；无需另外完成教材、题组或整卷。",
+    "core": "规则"
+  },
+  {
+    "title": "MAA · 2026–27 赛季日期",
+    "url": "https://maa.org/amcreg/",
+    "cost": "免费查阅",
+    "language": "英文",
+    "stage": "家长可选参考，不是额外练习安排",
+    "practice": "不练题",
+    "status": "正文已读取",
+    "use": "只供家长查阅。若选用其中内容，替换本周原有概念时段或一道同主题题目，总预算仍为30分钟；无需另外完成教材、题组或整卷。",
+    "core": "规则"
+  },
+  {
+    "title": "LIVE by Po-Shen Loh · 历年真题",
+    "url": "https://live.poshenloh.com/past-contests",
+    "cost": "真题档案免费",
+    "language": "英文",
+    "stage": "家长可选参考，不是额外练习安排",
+    "practice": "可在线计时，提供PDF与解析入口",
+    "status": "正文及2025卷页面已读取",
+    "use": "只供家长查阅。若选用其中内容，替换本周原有概念时段或一道同主题题目，总预算仍为30分钟；无需另外完成教材、题组或整卷。",
+    "core": "真题"
+  },
+  {
+    "title": "AoPS Wiki · AMC 8 Problems and Solutions",
+    "url": "https://artofproblemsolving.com/wiki/index.php/AMC_8_Problems_and_Solutions",
+    "cost": "免费",
+    "language": "英文",
+    "stage": "家长可选参考，不是额外练习安排",
+    "practice": "历年题与社区解答",
+    "status": "抓取403，未读到该索引正文；AoPS资源页确认Wiki用途",
+    "use": "只供家长查阅。若选用其中内容，替换本周原有概念时段或一道同主题题目，总预算仍为30分钟；无需另外完成教材、题组或整卷。",
+    "core": "备用"
+  },
+  {
+    "title": "AoPS · Prealgebra",
+    "url": "https://artofproblemsolving.com/store/book/prealgebra",
+    "cost": "收费书，未核验售价",
+    "language": "英文",
+    "stage": "家长可选参考，不是额外练习安排",
+    "practice": "书内问题及解答，需合法取得",
+    "status": "书目正文已读取",
+    "use": "只供家长查阅。若选用其中内容，替换本周原有概念时段或一道同主题题目，总预算仍为30分钟；无需另外完成教材、题组或整卷。",
+    "core": "概念"
+  },
+  {
+    "title": "Jason Batterson · Competition Math for Middle School",
+    "url": "https://artofproblemsolving.com/store/book/competition-math",
+    "cost": "收费书，未核验售价",
+    "language": "英文",
+    "stage": "家长可选参考，不是额外练习安排",
+    "practice": "书内700余例题与问题、完整解法",
+    "status": "书目正文已读取",
+    "use": "只供家长查阅。若选用其中内容，替换本周原有概念时段或一道同主题题目，总预算仍为30分钟；无需另外完成教材、题组或整卷。",
+    "core": "方法"
+  },
+  {
+    "title": "AoPS · Introduction to Counting & Probability",
+    "url": "https://artofproblemsolving.com/store/book/intro-counting",
+    "cost": "收费书，未核验售价",
+    "language": "英文",
+    "stage": "家长可选参考，不是额外练习安排",
+    "practice": "书内400余问题，需合法取得",
+    "status": "第二版书目正文已读取",
+    "use": "只供家长查阅。若选用其中内容，替换本周原有概念时段或一道同主题题目，总预算仍为30分钟；无需另外完成教材、题组或整卷。",
+    "core": "拓展"
+  },
+  {
+    "title": "AoPS · Alcumus",
+    "url": "https://artofproblemsolving.com/alcumus",
+    "cost": "免费系统",
+    "language": "英文",
+    "stage": "家长可选参考，不是额外练习安排",
+    "practice": "可互动练题，通常需AoPS账号保存进度",
+    "status": "入口已读取；动态题目未登录测试，免费性质由资源总页核实",
+    "use": "只供家长查阅。若选用其中内容，替换本周原有概念时段或一道同主题题目，总预算仍为30分钟；无需另外完成教材、题组或整卷。",
+    "core": "练习"
+  },
+  {
+    "title": "AoPS · MATHCOUNTS Trainer",
+    "url": "https://artofproblemsolving.com/mathcounts_trainer",
+    "cost": "免费资源",
+    "language": "英文",
+    "stage": "家长可选参考，不是额外练习安排",
+    "practice": "互动题与完整解法，动态界面",
+    "status": "入口已读取；具体题目未交互测试；资源总页说明含历年题及解法",
+    "use": "只供家长查阅。若选用其中内容，替换本周原有概念时段或一道同主题题目，总预算仍为30分钟；无需另外完成教材、题组或整卷。",
+    "core": "拓展"
+  },
+  {
+    "title": "MATHCOUNTS · 官方资源与每周一题",
+    "url": "https://www.mathcounts.org/resources",
+    "cost": "公开条目可免费阅读",
+    "language": "英文",
+    "stage": "家长可选参考，不是额外练习安排",
+    "practice": "按条目进入问题与解析",
+    "status": "资源正文已读取，见2026年11月条目",
+    "use": "只供家长查阅。若选用其中内容，替换本周原有概念时段或一道同主题题目，总预算仍为30分钟；无需另外完成教材、题组或整卷。",
+    "core": "拓展"
+  },
+  {
+    "title": "MATHCOUNTS · 2026–27 School Handbook",
+    "url": "https://www.mathcounts.org/resources/school-handbook",
+    "cost": "完整版收费或随竞赛注册提供",
+    "language": "英文",
+    "stage": "家长可选参考，不是额外练习安排",
+    "practice": "购买版200题；已注册教练版250题及解析",
+    "status": "当年手册说明已读取，未获取需登录/购买的全文",
+    "use": "只供家长查阅。若选用其中内容，替换本周原有概念时段或一道同主题题目，总预算仍为30分钟；无需另外完成教材、题组或整卷。",
+    "core": "拓展"
+  }
+]
